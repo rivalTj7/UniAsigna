@@ -1,7 +1,9 @@
 'use client';
+import { useAuth } from '@/lib/hooks/useAuth';
 
 import { useEffect, useState } from 'react';
 import Navigation from '@/components/Navigation';
+import Footer from '@/components/Footer';
 import { Calendar, Search, Filter } from 'lucide-react';
 import { getNombreMes, formatearFechaCorta } from '@/lib/utils/dates';
 
@@ -32,22 +34,33 @@ interface Asignacion {
 }
 
 export default function HistorialPage() {
+  const { getUser } = useAuth(); // Protección de autenticación
   const [asignaciones, setAsignaciones] = useState<Asignacion[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterMes, setFilterMes] = useState('');
   const [filterAnio, setFilterAnio] = useState('');
   const [filterEstado, setFilterEstado] = useState('');
+  const [isAdmin, setIsAdmin] = useState(false);
   
   useEffect(() => {
+    const user = getUser();
+    if (user) {
+      setIsAdmin(user.rol === 'ADMIN');
+    }
     fetchHistorial();
-  }, []);
+  }, [getUser]);
   
   const fetchHistorial = async () => {
     try {
-      const response = await fetch('/api/asignaciones');
+      const user = getUser();
+      if (!user) return;
+      
+      // Si es usuario normal, solo cargar SUS asignaciones
+      const filter = user.rol === 'ADMIN' ? '' : `?estudianteId=${user.id}`;
+      const response = await fetch(`/api/asignaciones${filter}`);
       const data = await response.json();
-      setAsignaciones(data);
+      setAsignaciones(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error('Error al cargar historial:', error);
     } finally {
@@ -93,8 +106,12 @@ export default function HistorialPage() {
           <div className="flex items-center space-x-3">
             <Calendar className="text-primary-600" size={32} />
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">Historial</h1>
-              <p className="text-gray-600">Todas las asignaciones registradas</p>
+              <h1 className="text-3xl font-bold text-gray-900">
+                {isAdmin ? 'Historial' : 'Mi Historial'}
+              </h1>
+              <p className="text-gray-600">
+                {isAdmin ? 'Todas las asignaciones registradas' : 'Mis asignaciones completadas'}
+              </p>
             </div>
           </div>
         </div>

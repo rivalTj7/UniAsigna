@@ -4,11 +4,12 @@ import { relations } from 'drizzle-orm';
 // Tabla de Estudiantes
 export const estudiantes = pgTable('estudiantes', {
   id: serial('id').primaryKey(),
+  codigo: varchar('codigo', { length: 20 }).notNull().unique(),
   nombre: varchar('nombre', { length: 100 }).notNull(),
   apellido: varchar('apellido', { length: 100 }).notNull(),
   carnet: varchar('carnet', { length: 20 }).notNull().unique(),
-  email: varchar('email', { length: 100 }).notNull().unique(),
-  telefono: varchar('telefono', { length: 20 }),
+  password: varchar('password', { length: 255 }).notNull(), // Contraseña hasheada
+  rol: varchar('rol', { length: 20 }).default('USUARIO').notNull(), // ADMIN o USUARIO
   activo: boolean('activo').default(true).notNull(),
   fechaCreacion: timestamp('fecha_creacion').defaultNow().notNull(),
 });

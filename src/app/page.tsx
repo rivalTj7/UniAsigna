@@ -2,8 +2,10 @@
 
 import { useEffect, useState } from 'react';
 import Navigation from '@/components/Navigation';
+import Footer from '@/components/Footer';
 import { Users, Store, ClipboardCheck, CheckCircle, Calendar } from 'lucide-react';
 import { getNombreMes, getMesActual, getAnioActual } from '@/lib/utils/dates';
+import { useAuth } from '@/lib/hooks/useAuth';
 
 interface Stats {
   totalEstudiantes: number;
@@ -16,6 +18,7 @@ interface Stats {
 }
 
 export default function Home() {
+  const { getUser } = useAuth(); // Protección de autenticación
   const [stats, setStats] = useState<Stats | null>(null);
   const [loading, setLoading] = useState(true);
   
@@ -25,7 +28,10 @@ export default function Home() {
   
   const fetchStats = async () => {
     try {
-      const response = await fetch('/api/dashboard/stats');
+      const user = getUser();
+      if (!user) return;
+      
+      const response = await fetch(`/api/dashboard/stats?userId=${user.id}&userRol=${user.rol}`);
       const data = await response.json();
       setStats(data);
     } catch (error) {
@@ -175,6 +181,8 @@ export default function Home() {
           </a>
         </div>
       </div>
+      
+      <Footer />
     </div>
   );
 }

@@ -35,11 +35,11 @@ export async function PUT(
     const [estudianteActualizado] = await db
       .update(estudiantes)
       .set({
+        codigo: body.codigo,
         nombre: body.nombre,
         apellido: body.apellido,
         carnet: body.carnet,
-        email: body.email,
-        telefono: body.telefono,
+        rol: body.rol,
         activo: body.activo,
       })
       .where(eq(estudiantes.id, id))
@@ -55,7 +55,7 @@ export async function PUT(
     
     if (error.code === '23505') {
       return NextResponse.json(
-        { error: 'El carnet o email ya existe' },
+        { error: 'El código o carnet ya existe' },
         { status: 409 }
       );
     }

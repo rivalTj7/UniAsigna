@@ -20,19 +20,19 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     
     // Validar campos requeridos
-    if (!body.nombre || !body.apellido || !body.carnet || !body.email) {
+    if (!body.codigo || !body.nombre || !body.apellido || !body.carnet) {
       return NextResponse.json(
-        { error: 'Nombre, apellido, carnet y email son requeridos' },
+        { error: 'Código, nombre, apellido y carnet son requeridos' },
         { status: 400 }
       );
     }
 
     const nuevoEstudiante: NuevoEstudiante = {
+      codigo: body.codigo,
       nombre: body.nombre,
       apellido: body.apellido,
       carnet: body.carnet,
-      email: body.email,
-      telefono: body.telefono || null,
+      rol: body.rol || 'USUARIO',
       activo: body.activo !== undefined ? body.activo : true,
     };
 
@@ -45,7 +45,7 @@ export async function POST(request: NextRequest) {
     // Manejar errores de duplicados
     if (error.code === '23505') {
       return NextResponse.json(
-        { error: 'El carnet o email ya existe' },
+        { error: 'El código o carnet ya existe' },
         { status: 409 }
       );
     }

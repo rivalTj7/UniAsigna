@@ -2,30 +2,33 @@
 
 import { useEffect, useState } from 'react';
 import Navigation from '@/components/Navigation';
+import Footer from '@/components/Footer';
 import { Plus, Edit2, Trash2, Search } from 'lucide-react';
+import { useAuth } from '@/lib/hooks/useAuth';
 
 interface Estudiante {
   id: number;
+  codigo: string;
   nombre: string;
   apellido: string;
   carnet: string;
-  email: string;
-  telefono?: string;
+  rol: string;
   activo: boolean;
 }
 
 export default function EstudiantesPage() {
+  useAuth(); // Protección de autenticación
   const [estudiantes, setEstudiantes] = useState<Estudiante[]>([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [formData, setFormData] = useState({
     id: null as number | null,
+    codigo: '',
     nombre: '',
     apellido: '',
     carnet: '',
-    email: '',
-    telefono: '',
+    rol: 'USUARIO',
     activo: true,
   });
   
@@ -75,11 +78,11 @@ export default function EstudiantesPage() {
   const handleEdit = (estudiante: Estudiante) => {
     setFormData({
       id: estudiante.id,
+      codigo: estudiante.codigo,
       nombre: estudiante.nombre,
       apellido: estudiante.apellido,
       carnet: estudiante.carnet,
-      email: estudiante.email,
-      telefono: estudiante.telefono || '',
+      rol: estudiante.rol,
       activo: estudiante.activo,
     });
     setShowModal(true);
@@ -101,11 +104,11 @@ export default function EstudiantesPage() {
   const resetForm = () => {
     setFormData({
       id: null,
+      codigo: '',
       nombre: '',
       apellido: '',
       carnet: '',
-      email: '',
-      telefono: '',
+      rol: 'USUARIO',
       activo: true,
     });
   };
@@ -157,10 +160,10 @@ export default function EstudiantesPage() {
             <table className="w-full">
               <thead className="bg-gray-50">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Carnet</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Código</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nombre</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Email</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Teléfono</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Carnet</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Rol</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Estado</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Acciones</th>
                 </tr>
@@ -169,16 +172,18 @@ export default function EstudiantesPage() {
                 {filteredEstudiantes.map((estudiante) => (
                   <tr key={estudiante.id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                      {estudiante.carnet}
+                      {estudiante.codigo}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                       {estudiante.nombre} {estudiante.apellido}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                      {estudiante.email}
+                      {estudiante.carnet}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                      {estudiante.telefono || '-'}
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className={estudiante.rol === 'ADMIN' ? 'badge-info' : 'badge-success'}>
+                        {estudiante.rol === 'ADMIN' ? 'Administrador' : 'Usuario'}
+                      </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span className={estudiante.activo ? 'badge-success' : 'badge-danger'}>
@@ -216,7 +221,19 @@ export default function EstudiantesPage() {
               
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
-                  <label className="label">Nombre</label>
+                  <label className="label">Código *</label>
+                  <input
+                    type="text"
+                    required
+                    value={formData.codigo}
+                    onChange={(e) => setFormData({ ...formData, codigo: e.target.value })}
+                    className="input"
+                    placeholder="Ej: EST001"
+                  />
+                </div>
+                
+                <div>
+                  <label className="label">Nombre *</label>
                   <input
                     type="text"
                     required
@@ -227,7 +244,7 @@ export default function EstudiantesPage() {
                 </div>
                 
                 <div>
-                  <label className="label">Apellido</label>
+                  <label className="label">Apellido *</label>
                   <input
                     type="text"
                     required
@@ -238,35 +255,32 @@ export default function EstudiantesPage() {
                 </div>
                 
                 <div>
-                  <label className="label">Carnet</label>
+                  <label className="label">Carnet *</label>
                   <input
                     type="text"
                     required
                     value={formData.carnet}
                     onChange={(e) => setFormData({ ...formData, carnet: e.target.value })}
                     className="input"
+                    placeholder="Ej: 202212345"
                   />
                 </div>
                 
                 <div>
-                  <label className="label">Email</label>
-                  <input
-                    type="email"
-                    required
-                    value={formData.email}
-                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                  <label className="label">Rol *</label>
+                  <select
+                    value={formData.rol}
+                    onChange={(e) => setFormData({ ...formData, rol: e.target.value })}
                     className="input"
-                  />
-                </div>
-                
-                <div>
-                  <label className="label">Teléfono</label>
-                  <input
-                    type="tel"
-                    value={formData.telefono}
-                    onChange={(e) => setFormData({ ...formData, telefono: e.target.value })}
-                    className="input"
-                  />
+                  >
+                    <option value="USUARIO">Usuario Normal</option>
+                    <option value="ADMIN">Administrador</option>
+                  </select>
+                  <p className="text-xs text-gray-500 mt-1">
+                    {formData.rol === 'ADMIN' 
+                      ? '✓ Puede ver todo, crear, modificar y eliminar'
+                      : '✓ Solo puede ver sus asignaciones y cargar informes'}
+                  </p>
                 </div>
                 
                 <div className="flex items-center space-x-2">
@@ -300,6 +314,8 @@ export default function EstudiantesPage() {
           </div>
         )}
       </div>
+      
+      <Footer />
     </div>
   );
 }

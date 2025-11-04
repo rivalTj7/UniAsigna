@@ -6,7 +6,7 @@ const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
   title: 'UniAsigna - Sistema de Auditoría de Expendios',
-  description: 'Sistema para asignar y gestionar auditorías de expendios universitarios',
+  description: 'Sistema para asignar y gestionar auditorías de expendios universitarios - USAC',
 };
 
 export default function RootLayout({
@@ -16,7 +16,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="es">
-      <body className={inter.className}>{children}</body>
+      <body className={`${inter.className} flex flex-col min-h-screen`}>
+        {children}
+      </body>
     </html>
   );
 }

@@ -1,7 +1,9 @@
 'use client';
+import { useAuth } from '@/lib/hooks/useAuth';
 
 import { useEffect, useState } from 'react';
 import Navigation from '@/components/Navigation';
+import Footer from '@/components/Footer';
 import { Plus, CheckCircle, Clock, FileText } from 'lucide-react';
 import { getNombreMes, getMesActual, getAnioActual, formatearFechaCorta } from '@/lib/utils/dates';
 
@@ -36,6 +38,7 @@ interface Asignacion {
 }
 
 export default function AsignacionesPage() {
+  const { getUser } = useAuth(); // Protección de autenticación
   const [asignaciones, setAsignaciones] = useState<Asignacion[]>([]);
   const [estudiantes, setEstudiantes] = useState<Estudiante[]>([]);
   const [expendiosDisponibles, setExpendiosDisponibles] = useState<Expendio[]>([]);
@@ -43,6 +46,7 @@ export default function AsignacionesPage() {
   const [showModalAsignar, setShowModalAsignar] = useState(false);
   const [showModalInforme, setShowModalInforme] = useState(false);
   const [selectedAsignacion, setSelectedAsignacion] = useState<Asignacion | null>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [formAsignar, setFormAsignar] = useState({
     estudianteId: '',
     expendioId: '',
@@ -53,24 +57,48 @@ export default function AsignacionesPage() {
   });
   
   useEffect(() => {
+    const user = getUser();
+    if (user) {
+      setIsAdmin(user.rol === 'ADMIN');
+    }
     fetchData();
-  }, []);
+  }, [getUser]);
   
   const fetchData = async () => {
     try {
-      const [asignacionesRes, estudiantesRes, expendiosRes] = await Promise.all([
-        fetch(`/api/asignaciones?mes=${getMesActual()}&anio=${getAnioActual()}`),
-        fetch('/api/estudiantes'),
-        fetch('/api/expendios/disponibles'),
-      ]);
+      const user = getUser();
+      if (!user) return;
       
-      const asignacionesData = await asignacionesRes.json();
-      const estudiantesData = await estudiantesRes.json();
-      const expendiosData = await expendiosRes.json();
+      const isUserAdmin = user.rol === 'ADMIN';
       
-      setAsignaciones(asignacionesData);
-      setEstudiantes(estudiantesData.filter((e: Estudiante & { activo: boolean }) => e.activo));
-      setExpendiosDisponibles(expendiosData.disponibles || []);
+      // Si es usuario normal, solo cargar SUS asignaciones
+      const asignacionesFilter = isUserAdmin 
+        ? `?mes=${getMesActual()}&anio=${getAnioActual()}`
+        : `?mes=${getMesActual()}&anio=${getAnioActual()}&estudianteId=${user.id}`;
+      
+      const promises = [
+        fetch(`/api/asignaciones${asignacionesFilter}`),
+      ];
+      
+      // Solo admin puede ver estudiantes y expendios
+      if (isUserAdmin) {
+        promises.push(
+          fetch('/api/estudiantes'),
+          fetch('/api/expendios/disponibles')
+        );
+      }
+      
+      const responses = await Promise.all(promises);
+      const asignacionesData = await responses[0].json();
+      
+      setAsignaciones(Array.isArray(asignacionesData) ? asignacionesData : []);
+      
+      if (isUserAdmin && responses.length > 1) {
+        const estudiantesData = await responses[1].json();
+        const expendiosData = await responses[2].json();
+        setEstudiantes(estudiantesData.filter((e: Estudiante & { activo: boolean }) => e.activo));
+        setExpendiosDisponibles(expendiosData.disponibles || []);
+      }
     } catch (error) {
       console.error('Error al cargar datos:', error);
     } finally {
@@ -140,19 +168,23 @@ export default function AsignacionesPage() {
       <div className="container mx-auto px-4 py-8">
         <div className="flex justify-between items-center mb-6">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Asignaciones</h1>
+            <h1 className="text-3xl font-bold text-gray-900">
+              {isAdmin ? 'Asignaciones' : 'Mis Asignaciones'}
+            </h1>
             <p className="text-gray-600 mt-1">
               {getNombreMes(getMesActual())} {getAnioActual()}
             </p>
           </div>
-          <button
-            onClick={() => setShowModalAsignar(true)}
-            className="btn-primary flex items-center space-x-2"
-            disabled={expendiosDisponibles.length === 0}
-          >
-            <Plus size={20} />
-            <span>Nueva Asignación</span>
-          </button>
+          {isAdmin && (
+            <button
+              onClick={() => setShowModalAsignar(true)}
+              className="btn-primary flex items-center space-x-2"
+              disabled={expendiosDisponibles.length === 0}
+            >
+              <Plus size={20} />
+              <span>Nueva Asignación</span>
+            </button>
+          )}
         </div>
         
         {/* Stats */}
@@ -161,7 +193,7 @@ export default function AsignacionesPage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-600">Total Asignaciones</p>
-                <p className="text-2xl font-bold text-gray-900">{asignaciones.length}</p>
+                <p className="text-2xl font-bold text-gray-900">{Array.isArray(asignaciones) ? asignaciones.length : 0}</p>
               </div>
               <FileText className="text-primary-600" size={32} />
             </div>
@@ -172,7 +204,7 @@ export default function AsignacionesPage() {
               <div>
                 <p className="text-sm text-gray-600">Informes Completados</p>
                 <p className="text-2xl font-bold text-green-600">
-                  {asignaciones.filter(a => a.informeCompletado).length}
+                  {Array.isArray(asignaciones) ? asignaciones.filter(a => a.informeCompletado).length : 0}
                 </p>
               </div>
               <CheckCircle className="text-green-600" size={32} />
@@ -184,7 +216,7 @@ export default function AsignacionesPage() {
               <div>
                 <p className="text-sm text-gray-600">Pendientes</p>
                 <p className="text-2xl font-bold text-yellow-600">
-                  {asignaciones.filter(a => !a.informeCompletado).length}
+                  {Array.isArray(asignaciones) ? asignaciones.filter(a => !a.informeCompletado).length : 0}
                 </p>
               </div>
               <Clock className="text-yellow-600" size={32} />

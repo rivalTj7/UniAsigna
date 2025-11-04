@@ -30,7 +30,6 @@ export async function GET(request: NextRequest) {
           nombre: estudiantes.nombre,
           apellido: estudiantes.apellido,
           carnet: estudiantes.carnet,
-          email: estudiantes.email,
         },
         expendio: {
           id: expendios.id,

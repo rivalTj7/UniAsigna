@@ -1,7 +1,9 @@
 'use client';
+import { useAuth } from '@/lib/hooks/useAuth';
 
 import { useEffect, useState } from 'react';
 import Navigation from '@/components/Navigation';
+import Footer from '@/components/Footer';
 import { Plus, Edit2, Trash2, Search } from 'lucide-react';
 
 interface Expendio {
@@ -14,6 +16,7 @@ interface Expendio {
 }
 
 export default function ExpendiosPage() {
+  useAuth(); // Protección de autenticación
   const [expendios, setExpendios] = useState<Expendio[]>([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
@@ -251,10 +254,11 @@ export default function ExpendiosPage() {
                     onChange={(e) => setFormData({ ...formData, tipo: e.target.value })}
                     className="input"
                   >
-                    <option value="KIOSKO">KIOSKO</option>
-                    <option value="CAFETERÍA">CAFETERÍA</option>
-                    <option value="COMEDOR">COMEDOR</option>
-                    <option value="OTRO">OTRO</option>
+                    <option value="KIOSKO">Kiosko</option>
+                    <option value="CARRETA">Carreta</option>
+                    <option value="MESA">Mesa</option>
+                    <option value="FOTOCOPIADORA">Fotocopiadora</option>
+                    <option value="LIBRERIA">Librería</option>
                   </select>
                 </div>
                 
