@@ -32,6 +32,7 @@ export async function POST(request: NextRequest) {
       nombre: body.nombre,
       apellido: body.apellido,
       carnet: body.carnet,
+      password: body.password || body.carnet, // Usar password proporcionado o carnet por defecto
       rol: body.rol || 'USUARIO',
       activo: body.activo !== undefined ? body.activo : true,
     };
