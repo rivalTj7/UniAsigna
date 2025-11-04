@@ -1,0 +1,178 @@
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                                                                              ║
+║                         🎓 UNIASIGNA v1.0                                    ║
+║              Sistema de Asignación y Auditoría de Expendios                 ║
+║                                                                              ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+¡BIENVENIDO! 👋
+
+Has recibido el código completo de UniAsigna, listo para desplegar en Vercel.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📋 LO QUE RECIBES:
+
+✅ Aplicación web completa en Next.js + TypeScript
+✅ 5 páginas funcionales (Dashboard, Estudiantes, Expendios, Asignaciones, Historial)
+✅ 11 API endpoints para backend
+✅ Base de datos PostgreSQL (esquema completo)
+✅ 31 expendios precargados desde tu Excel
+✅ Sistema de ciclo mensual automático
+✅ Diseño responsive y moderno
+✅ 100% GRATIS para desplegar
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🚀 INICIO RÁPIDO (3 PASOS):
+
+1. LEE EL ARCHIVO: DESPLIEGUE.md
+   ↳ Tiene el paso a paso COMPLETO para subir a Vercel
+
+2. LEE EL ARCHIVO: README.md
+   ↳ Documentación completa del proyecto
+
+3. SIGUE EL CHECKLIST.md después de desplegar
+   ↳ Para verificar que todo funciona correctamente
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📁 ARCHIVOS DE DOCUMENTACIÓN:
+
+📄 LEEME.txt          ← ¡Estás aquí! Inicio rápido
+📄 DESPLIEGUE.md      ← PASO A PASO para poner online
+📄 README.md          ← Documentación completa del proyecto
+📄 RESUMEN.md         ← Resumen ejecutivo
+📄 ESTRUCTURA.md      ← Explicación técnica de archivos
+📄 CHECKLIST.md       ← Verificación post-despliegue
+📄 DISENO.md          ← Guía visual del diseño
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+⚡ DESPLIEGUE ULTRA-RÁPIDO (5-10 minutos):
+
+PASO 1: Sube a GitHub
+------------------------
+cd uniasigna
+git init
+git add .
+git commit -m "Initial commit"
+git remote add origin https://github.com/TU-USUARIO/uniasigna.git
+git push -u origin main
+
+PASO 2: Despliega en Vercel
+------------------------
+1. Ve a vercel.com
+2. Importa tu repositorio de GitHub
+3. Click en "Deploy"
+4. ¡Espera 2 minutos!
+
+PASO 3: Agrega Base de Datos
+------------------------
+1. En Vercel → Storage → Create Database
+2. Selecciona Postgres (Neon)
+3. Click en "Create"
+4. Ejecuta el SQL de inicialización (ver DESPLIEGUE.md)
+
+¡LISTO! Tu app estará en: https://tu-proyecto.vercel.app
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+✨ CARACTERÍSTICAS PRINCIPALES:
+
+📊 Dashboard
+   ↳ Vista general con estadísticas en tiempo real
+   ↳ Monitoreo de asignaciones del mes
+
+👥 Gestión de Estudiantes
+   ↳ Crear, editar, eliminar estudiantes
+   ↳ Búsqueda y filtros
+
+🏪 Gestión de Expendios
+   ↳ CRUD completo de expendios
+   ↳ 31 expendios precargados
+
+📋 Sistema de Asignaciones
+   ↳ Asignar expendio a estudiante
+   ↳ Expendios asignados DESAPARECEN hasta próximo mes
+   ↳ Un expendio = Un estudiante por mes
+
+📝 Carga de Informes
+   ↳ Estudiantes cargan auditorías
+   ↳ Calificación y observaciones
+   ↳ Fecha automática
+
+📜 Historial Completo
+   ↳ Todas las asignaciones pasadas
+   ↳ Búsqueda y filtros por mes/año
+   ↳ Datos permanentes
+
+🔄 Reinicio Automático
+   ↳ Último día del mes a las 23:59
+   ↳ Todos los expendios vuelven disponibles
+   ↳ Asignaciones → Historial
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🛠️ TECNOLOGÍAS UTILIZADAS:
+
+- Next.js 14 (Framework React)
+- TypeScript (Tipado estático)
+- Tailwind CSS (Estilos modernos)
+- PostgreSQL (Base de datos)
+- Drizzle ORM (Manejo de DB)
+- Vercel (Hosting gratis)
+- Lucide React (Iconos)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+💰 COSTO: $0 DÓLARES
+
+✅ Vercel Hobby Plan: GRATIS
+✅ Neon PostgreSQL: GRATIS (0.5GB)
+✅ GitHub: GRATIS
+✅ Dominio .vercel.app: GRATIS
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📂 ESTRUCTURA DEL PROYECTO:
+
+uniasigna/
+├── 📄 Documentación (8 archivos MD)
+├── 📂 src/
+│   ├── 📂 app/           # Páginas y API routes
+│   ├── 📂 components/    # Componentes React
+│   └── 📂 lib/           # Base de datos y utilidades
+├── 📂 scripts/           # Scripts de inicialización
+└── 📄 Configuración (package.json, tsconfig.json, etc.)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🎯 SIGUIENTE PASO:
+
+>>> ABRE EL ARCHIVO: DESPLIEGUE.md <<<
+
+Ese archivo tiene TODO el paso a paso para poner tu app online en 10 minutos.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+❓ ¿NECESITAS AYUDA?
+
+1. Lee DESPLIEGUE.md primero
+2. Revisa README.md para más detalles
+3. Usa CHECKLIST.md para verificar
+4. Consulta ESTRUCTURA.md para entender el código
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🎉 ¡GRACIAS POR USAR UNIASIGNA!
+
+Sistema creado con ❤️ para facilitar la gestión de auditorías universitarias.
+
+Version: 1.0
+Fecha: Noviembre 2025
+Licencia: MIT (código abierto)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🚀 ¡ÉXITO CON TU PROYECTO! 🚀
