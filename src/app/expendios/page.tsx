@@ -1,6 +1,8 @@
 'use client';
-import { useAuth } from '@/lib/hooks/useAuth';
 
+export const dynamic = 'force-dynamic';
+
+import { useAuth } from '@/lib/hooks/useAuth';
 import { useEffect, useState } from 'react';
 import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
