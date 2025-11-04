@@ -9,9 +9,9 @@ export default function EncriptadorPage() {
   const [loading, setLoading] = useState(false);
   const [copied, setCopied] = useState(false);
   
-  const handleEncrypt = async () => {
+  const handleEncrypt = async (e: React.FormEvent) => {
+    e.preventDefault();
     if (!password) {
-      alert('Por favor ingresa una contraseña');
       return;
     }
     
@@ -29,10 +29,10 @@ export default function EncriptadorPage() {
       if (response.ok) {
         setHashedPassword(data.hashedPassword);
       } else {
-        alert('Error al encriptar');
+        console.error('Error al encriptar');
       }
     } catch (error) {
-      alert('Error de conexión');
+      console.error('Error de conexión:', error);
     } finally {
       setLoading(false);
     }

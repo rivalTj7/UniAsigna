@@ -4,6 +4,7 @@ import { useAuth } from '@/lib/hooks/useAuth';
 import { useEffect, useState } from 'react';
 import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
+import LoadingSpinner from '@/components/LoadingSpinner';
 import { Plus, CheckCircle, Clock, FileText } from 'lucide-react';
 import { getNombreMes, getMesActual, getAnioActual, formatearFechaCorta } from '@/lib/utils/dates';
 
@@ -60,47 +61,39 @@ export default function AsignacionesPage() {
     const user = getUser();
     if (user) {
       setIsAdmin(user.rol === 'ADMIN');
+      fetchData();
     }
-    fetchData();
-  }, [getUser]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   
   const fetchData = async () => {
     try {
       const user = getUser();
-      if (!user) return;
-      
-      const isUserAdmin = user.rol === 'ADMIN';
-      
-      // Si es usuario normal, solo cargar SUS asignaciones
-      const asignacionesFilter = isUserAdmin 
-        ? `?mes=${getMesActual()}&anio=${getAnioActual()}`
-        : `?mes=${getMesActual()}&anio=${getAnioActual()}&estudianteId=${user.id}`;
-      
-      const promises = [
-        fetch(`/api/asignaciones${asignacionesFilter}`),
-      ];
-      
-      // Solo admin puede ver estudiantes y expendios
-      if (isUserAdmin) {
-        promises.push(
-          fetch('/api/estudiantes'),
-          fetch('/api/expendios/disponibles')
-        );
+      if (!user) {
+        setLoading(false);
+        return;
       }
       
-      const responses = await Promise.all(promises);
-      const asignacionesData = await responses[0].json();
+      // ✅ UNA SOLA LLAMADA optimizada que trae todo lo necesario
+      const response = await fetch(
+        `/api/asignaciones/data?userId=${user.id}&userRol=${user.rol}`
+      );
       
-      setAsignaciones(Array.isArray(asignacionesData) ? asignacionesData : []);
-      
-      if (isUserAdmin && responses.length > 1) {
-        const estudiantesData = await responses[1].json();
-        const expendiosData = await responses[2].json();
-        setEstudiantes(estudiantesData.filter((e: Estudiante & { activo: boolean }) => e.activo));
-        setExpendiosDisponibles(expendiosData.disponibles || []);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
+      
+      const data = await response.json();
+      
+      // Actualizar estados con los datos recibidos
+      setAsignaciones(Array.isArray(data.asignaciones) ? data.asignaciones : []);
+      setEstudiantes(Array.isArray(data.estudiantes) ? data.estudiantes : []);
+      setExpendiosDisponibles(Array.isArray(data.expendiosDisponibles) ? data.expendiosDisponibles : []);
     } catch (error) {
       console.error('Error al cargar datos:', error);
+      setAsignaciones([]);
+      setEstudiantes([]);
+      setExpendiosDisponibles([]);
     } finally {
       setLoading(false);
     }
@@ -120,17 +113,16 @@ export default function AsignacionesPage() {
       });
       
       if (response.ok) {
-        await fetchData();
         setShowModalAsignar(false);
         setFormAsignar({ estudianteId: '', expendioId: '' });
-        alert('Asignación creada exitosamente');
+        // ✅ Recargar datos optimizado
+        await fetchData();
       } else {
         const error = await response.json();
-        alert(error.error || 'Error al crear asignación');
+        console.error('Error al crear asignación:', error.error || 'Error desconocido');
       }
     } catch (error) {
       console.error('Error:', error);
-      alert('Error al crear asignación');
     }
   };
   
@@ -146,18 +138,17 @@ export default function AsignacionesPage() {
       });
       
       if (response.ok) {
-        await fetchData();
         setShowModalInforme(false);
         setSelectedAsignacion(null);
         setFormInforme({ observaciones: '', calificacion: 'Bueno' });
-        alert('Informe cargado exitosamente');
+        // ✅ Recargar datos optimizado
+        await fetchData();
       } else {
         const error = await response.json();
-        alert(error.error || 'Error al cargar informe');
+        console.error('Error al cargar informe:', error.error || 'Error desconocido');
       }
     } catch (error) {
       console.error('Error:', error);
-      alert('Error al cargar informe');
     }
   };
   
@@ -165,61 +156,62 @@ export default function AsignacionesPage() {
     <div className="min-h-screen bg-gray-50">
       <Navigation />
       
-      <div className="container mx-auto px-4 py-8">
-        <div className="flex justify-between items-center mb-6">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">
-              {isAdmin ? 'Asignaciones' : 'Mis Asignaciones'}
-            </h1>
-            <p className="text-gray-600 mt-1">
-              {getNombreMes(getMesActual())} {getAnioActual()}
-            </p>
+            <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-8">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 sm:mb-6 gap-3">
+          <div className="flex items-center space-x-2 sm:space-x-3">
+            <FileText className="text-primary-600 flex-shrink-0" size={24} />
+            <div>
+              <h1 className="text-xl sm:text-3xl font-bold text-gray-900">{isAdmin ? 'Asignaciones' : 'Mis Asignaciones'}</h1>
+              <p className="text-xs sm:text-base text-gray-600">
+                {getNombreMes(getMesActual())} {getAnioActual()}
+              </p>
+            </div>
           </div>
           {isAdmin && (
             <button
               onClick={() => setShowModalAsignar(true)}
-              className="btn-primary flex items-center space-x-2"
+              className="btn-primary flex items-center space-x-2 text-sm sm:text-base w-full sm:w-auto justify-center"
               disabled={expendiosDisponibles.length === 0}
             >
-              <Plus size={20} />
+              <Plus size={18} />
               <span>Nueva Asignación</span>
             </button>
           )}
         </div>
         
         {/* Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 mb-4 sm:mb-6">
           <div className="card">
             <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600">Total Asignaciones</p>
-                <p className="text-2xl font-bold text-gray-900">{Array.isArray(asignaciones) ? asignaciones.length : 0}</p>
+              <div className="flex-1 min-w-0">
+                <p className="text-xs sm:text-sm text-gray-600 mb-1 truncate">Total Asignaciones</p>
+                <p className="text-xl sm:text-2xl font-bold text-gray-900">{Array.isArray(asignaciones) ? asignaciones.length : 0}</p>
               </div>
-              <FileText className="text-primary-600" size={32} />
+              <FileText className="text-primary-600 flex-shrink-0 ml-2" size={24} />
             </div>
           </div>
           
           <div className="card">
             <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600">Informes Completados</p>
-                <p className="text-2xl font-bold text-green-600">
+              <div className="flex-1 min-w-0">
+                <p className="text-xs sm:text-sm text-gray-600 mb-1 truncate">Informes Completados</p>
+                <p className="text-xl sm:text-2xl font-bold text-green-600">
                   {Array.isArray(asignaciones) ? asignaciones.filter(a => a.informeCompletado).length : 0}
                 </p>
               </div>
-              <CheckCircle className="text-green-600" size={32} />
+              <CheckCircle className="text-green-600 flex-shrink-0 ml-2" size={24} />
             </div>
           </div>
           
           <div className="card">
             <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600">Pendientes</p>
-                <p className="text-2xl font-bold text-yellow-600">
+              <div className="flex-1 min-w-0">
+                <p className="text-xs sm:text-sm text-gray-600 mb-1 truncate">Pendientes</p>
+                <p className="text-xl sm:text-2xl font-bold text-yellow-600">
                   {Array.isArray(asignaciones) ? asignaciones.filter(a => !a.informeCompletado).length : 0}
                 </p>
               </div>
-              <Clock className="text-yellow-600" size={32} />
+              <Clock className="text-yellow-600 flex-shrink-0 ml-2" size={24} />
             </div>
           </div>
         </div>
@@ -227,39 +219,39 @@ export default function AsignacionesPage() {
         {/* Asignaciones List */}
         <div className="card">
           {loading ? (
-            <div className="text-center py-8 text-gray-500">Cargando...</div>
+            <LoadingSpinner />
           ) : asignaciones.length === 0 ? (
             <div className="text-center py-8 text-gray-500">
               No hay asignaciones para este mes
             </div>
           ) : (
-            <div className="space-y-4">
+            <div className="space-y-3 sm:space-y-4">
               {asignaciones.map((asignacion) => (
                 <div
                   key={asignacion.id}
-                  className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow"
+                  className="border border-gray-200 rounded-lg p-3 sm:p-4 hover:shadow-md transition-shadow"
                 >
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <div className="flex items-center space-x-3 mb-2">
-                        <h3 className="text-lg font-bold text-gray-900">
+                  <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex flex-wrap items-center gap-2 mb-2">
+                        <h3 className="text-base sm:text-lg font-bold text-gray-900">
                           {asignacion.estudiante.nombre} {asignacion.estudiante.apellido}
                         </h3>
-                        <span className="badge-info">{asignacion.estudiante.carnet}</span>
+                        <span className="badge-info text-xs">{asignacion.estudiante.carnet}</span>
                         {asignacion.informeCompletado ? (
-                          <span className="badge-success flex items-center space-x-1">
-                            <CheckCircle size={14} />
+                          <span className="badge-success flex items-center space-x-1 text-xs">
+                            <CheckCircle size={12} />
                             <span>Completado</span>
                           </span>
                         ) : (
-                          <span className="badge-warning flex items-center space-x-1">
-                            <Clock size={14} />
+                          <span className="badge-warning flex items-center space-x-1 text-xs">
+                            <Clock size={12} />
                             <span>Pendiente</span>
                           </span>
                         )}
                       </div>
                       
-                      <div className="space-y-1 text-sm text-gray-600">
+                      <div className="space-y-1 text-xs sm:text-sm text-gray-600">
                         <p><strong>Expendio:</strong> {asignacion.expendio.ubicacion}</p>
                         <p><strong>Propietario:</strong> {asignacion.expendio.nombrePropietario}</p>
                         {asignacion.expendio.archivo && (
@@ -287,7 +279,7 @@ export default function AsignacionesPage() {
                           setSelectedAsignacion(asignacion);
                           setShowModalInforme(true);
                         }}
-                        className="btn-success text-sm"
+                        className="btn-success text-xs sm:text-sm w-full sm:w-auto justify-center flex-shrink-0"
                       >
                         Cargar Informe
                       </button>

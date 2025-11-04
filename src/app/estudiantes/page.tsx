@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
+import LoadingSpinner from '@/components/LoadingSpinner';
 import { Plus, Edit2, Trash2, Search } from 'lucide-react';
 import { useAuth } from '@/lib/hooks/useAuth';
 
@@ -67,11 +68,10 @@ export default function EstudiantesPage() {
         resetForm();
       } else {
         const error = await response.json();
-        alert(error.error || 'Error al guardar estudiante');
+        console.error('Error al guardar estudiante:', error.error || 'Error desconocido');
       }
     } catch (error) {
       console.error('Error:', error);
-      alert('Error al guardar estudiante');
     }
   };
   
@@ -121,93 +121,101 @@ export default function EstudiantesPage() {
     <div className="min-h-screen bg-gray-50">
       <Navigation />
       
-      <div className="container mx-auto px-4 py-8">
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-3xl font-bold text-gray-900">Estudiantes</h1>
+      <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-8">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 sm:mb-6 gap-3">
+          <h1 className="text-xl sm:text-3xl font-bold text-gray-900">Estudiantes</h1>
           <button
             onClick={() => {
               resetForm();
               setShowModal(true);
             }}
-            className="btn-primary flex items-center space-x-2"
+            className="btn-primary flex items-center space-x-2 text-sm sm:text-base w-full sm:w-auto justify-center"
           >
-            <Plus size={20} />
+            <Plus size={18} />
             <span>Nuevo Estudiante</span>
           </button>
         </div>
         
         {/* Search */}
-        <div className="card mb-6">
+        <div className="card mb-4 sm:mb-6">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
             <input
               type="text"
               placeholder="Buscar por nombre o carnet..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="input pl-10"
+              className="input pl-10 text-sm sm:text-base"
             />
           </div>
         </div>
         
         {/* Table */}
-        <div className="card overflow-x-auto">
+        <div className="card p-0 sm:p-6">
           {loading ? (
-            <div className="text-center py-8 text-gray-500">Cargando...</div>
+            <div className="p-6">
+              <LoadingSpinner />
+            </div>
           ) : filteredEstudiantes.length === 0 ? (
-            <div className="text-center py-8 text-gray-500">No hay estudiantes registrados</div>
+            <div className="text-center py-8 text-gray-500 px-4">No hay estudiantes registrados</div>
           ) : (
-            <table className="w-full">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Código</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nombre</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Carnet</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Rol</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Estado</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Acciones</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-200">
-                {filteredEstudiantes.map((estudiante) => (
-                  <tr key={estudiante.id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                      {estudiante.codigo}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {estudiante.nombre} {estudiante.apellido}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                      {estudiante.carnet}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={estudiante.rol === 'ADMIN' ? 'badge-info' : 'badge-success'}>
-                        {estudiante.rol === 'ADMIN' ? 'Administrador' : 'Usuario'}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={estudiante.activo ? 'badge-success' : 'badge-danger'}>
-                        {estudiante.activo ? 'Activo' : 'Inactivo'}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
-                      <button
-                        onClick={() => handleEdit(estudiante)}
-                        className="text-primary-600 hover:text-primary-900"
-                      >
-                        <Edit2 size={18} />
-                      </button>
-                      <button
-                        onClick={() => handleDelete(estudiante.id)}
-                        className="text-red-600 hover:text-red-900"
-                      >
-                        <Trash2 size={18} />
-                      </button>
-                    </td>
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Código</th>
+                    <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nombre</th>
+                    <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Carnet</th>
+                    <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Rol</th>
+                    <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
+                    <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {filteredEstudiantes.map((estudiante) => (
+                    <tr key={estudiante.id} className="hover:bg-gray-50">
+                      <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-xs sm:text-sm font-medium text-gray-900">
+                        {estudiante.codigo}
+                      </td>
+                      <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-xs sm:text-sm text-gray-900">
+                        {estudiante.nombre} {estudiante.apellido}
+                      </td>
+                      <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-xs sm:text-sm text-gray-600">
+                        {estudiante.carnet}
+                      </td>
+                      <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap">
+                        <span className={`text-xs px-2 py-1 rounded-full font-medium ${estudiante.rol === 'ADMIN' ? 'badge-info' : 'badge-success'}`}>
+                          {estudiante.rol === 'ADMIN' ? 'Admin' : 'Usuario'}
+                        </span>
+                      </td>
+                      <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap">
+                        <span className={`text-xs px-2 py-1 rounded-full font-medium ${estudiante.activo ? 'badge-success' : 'badge-danger'}`}>
+                          {estudiante.activo ? 'Activo' : 'Inactivo'}
+                        </span>
+                      </td>
+                      <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-sm font-medium">
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={() => handleEdit(estudiante)}
+                            className="text-primary-600 hover:text-primary-900 p-1"
+                            title="Editar"
+                          >
+                            <Edit2 size={16} className="sm:w-[18px] sm:h-[18px]" />
+                          </button>
+                          <button
+                            onClick={() => handleDelete(estudiante.id)}
+                            className="text-red-600 hover:text-red-900 p-1"
+                            title="Eliminar"
+                          >
+                            <Trash2 size={16} className="sm:w-[18px] sm:h-[18px]" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           )}
         </div>
         

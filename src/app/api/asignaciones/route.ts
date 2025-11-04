@@ -12,6 +12,13 @@ export async function GET(request: NextRequest) {
     const anio = searchParams.get('anio');
     const estudianteId = searchParams.get('estudianteId');
     
+    // Construir condiciones de filtro
+    const conditions = [];
+    if (mes) conditions.push(eq(asignaciones.mes, parseInt(mes)));
+    if (anio) conditions.push(eq(asignaciones.anio, parseInt(anio)));
+    if (estudianteId) conditions.push(eq(asignaciones.estudianteId, parseInt(estudianteId)));
+    
+    // Construir query base
     let query = db
       .select({
         id: asignaciones.id,
@@ -41,14 +48,10 @@ export async function GET(request: NextRequest) {
       })
       .from(asignaciones)
       .innerJoin(estudiantes, eq(asignaciones.estudianteId, estudiantes.id))
-      .innerJoin(expendios, eq(asignaciones.expendioId, expendios.id));
+      .innerJoin(expendios, eq(asignaciones.expendioId, expendios.id))
+      .$dynamic();
     
     // Aplicar filtros si existen
-    const conditions = [];
-    if (mes) conditions.push(eq(asignaciones.mes, parseInt(mes)));
-    if (anio) conditions.push(eq(asignaciones.anio, parseInt(anio)));
-    if (estudianteId) conditions.push(eq(asignaciones.estudianteId, parseInt(estudianteId)));
-    
     if (conditions.length > 0) {
       query = query.where(and(...conditions));
     }

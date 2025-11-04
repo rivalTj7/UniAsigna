@@ -22,6 +22,20 @@ export function useAuth() {
     if (!userString) {
       // No hay sesión, redirigir a login
       router.push('/login');
+      return;
+    }
+    
+    // Verificar permisos por rol
+    const user = JSON.parse(userString);
+    
+    // Si es USUARIO (estudiante), solo puede acceder a Dashboard, Asignaciones e Historial
+    if (user.rol === 'USUARIO') {
+      const rutasPermitidasUsuario = ['/', '/asignaciones', '/historial'];
+      
+      // Si intenta acceder a una ruta no permitida, redirigir a historial
+      if (!rutasPermitidasUsuario.includes(pathname)) {
+        router.push('/historial');
+      }
     }
   }, [pathname, router]);
   

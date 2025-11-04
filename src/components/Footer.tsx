@@ -28,7 +28,7 @@ export default function Footer() {
               Laboratorio de Control Microbiológico de Alimentos
             </p>
             <p className="text-gray-400 text-sm mt-2">
-              Facultad de Ingeniería
+              Facultad de Ciencias Químicas y Farmacia
             </p>
             <p className="text-gray-400 text-sm">
               USAC - Universidad de San Carlos
@@ -53,7 +53,7 @@ export default function Footer() {
                 <Mail size={20} />
               </a>
               <a 
-                href="https://github.com/RivaldoTJ" 
+                href="https://github.com/rivalTj7" 
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-gray-400 hover:text-white transition-colors"
@@ -62,7 +62,7 @@ export default function Footer() {
                 <Github size={20} />
               </a>
               <a 
-                href="https://linkedin.com/in/rivaldo-tojin" 
+                href="https://www.linkedin.com/in/rivaldo-tojín-54286b307" 
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-gray-400 hover:text-white transition-colors"
@@ -80,7 +80,7 @@ export default function Footer() {
             © {currentYear} UniAsigna. Todos los derechos reservados.
           </p>
           <p className="text-gray-500 text-xs mt-1">
-            Desarrollado para la Universidad de San Carlos de Guatemala
+            Desarrollado por Rivaldo Alexander Tojíns
           </p>
         </div>
       </div>

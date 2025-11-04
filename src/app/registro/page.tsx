@@ -50,10 +50,8 @@ export default function RegistroPage() {
       });
       
       const data = await response.json();
-      
-      if (response.ok) {
-        // Redirigir al login
-        alert('¡Registro exitoso! Ahora puedes iniciar sesión.');
+
+      if (data.success) {
         router.push('/login');
       } else {
         setError(data.error || 'Error al registrarse');

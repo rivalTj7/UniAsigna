@@ -4,6 +4,7 @@ import { useAuth } from '@/lib/hooks/useAuth';
 import { useEffect, useState } from 'react';
 import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
+import LoadingSpinner from '@/components/LoadingSpinner';
 import { Calendar, Search, Filter } from 'lucide-react';
 import { getNombreMes, formatearFechaCorta } from '@/lib/utils/dates';
 
@@ -41,32 +42,45 @@ export default function HistorialPage() {
   const [filterMes, setFilterMes] = useState('');
   const [filterAnio, setFilterAnio] = useState('');
   const [filterEstado, setFilterEstado] = useState('');
-  const [isAdmin, setIsAdmin] = useState(false);
+  
+  const user = getUser();
+  const isAdmin = user?.rol === 'ADMIN';
   
   useEffect(() => {
-    const user = getUser();
-    if (user) {
-      setIsAdmin(user.rol === 'ADMIN');
-    }
+    const fetchHistorial = async () => {
+      try {
+        const currentUser = getUser();
+        if (!currentUser) {
+          setLoading(false);
+          return;
+        }
+        
+        let url = '/api/asignaciones';
+        
+        // Si es USUARIO (estudiante), filtrar solo sus asignaciones
+        if (currentUser.rol === 'USUARIO') {
+          url = `/api/asignaciones?estudianteId=${currentUser.id}`;
+        }
+        
+        const response = await fetch(url);
+        
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        setAsignaciones(Array.isArray(data) ? data : []);
+      } catch (error) {
+        console.error('Error al cargar historial:', error);
+        setAsignaciones([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
     fetchHistorial();
-  }, [getUser]);
-  
-  const fetchHistorial = async () => {
-    try {
-      const user = getUser();
-      if (!user) return;
-      
-      // Si es usuario normal, solo cargar SUS asignaciones
-      const filter = user.rol === 'ADMIN' ? '' : `?estudianteId=${user.id}`;
-      const response = await fetch(`/api/asignaciones${filter}`);
-      const data = await response.json();
-      setAsignaciones(Array.isArray(data) ? data : []);
-    } catch (error) {
-      console.error('Error al cargar historial:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   
   // Obtener años únicos
   const aniosUnicos = [...new Set(asignaciones.map(a => a.anio))].sort((a, b) => b - a);
@@ -101,15 +115,15 @@ export default function HistorialPage() {
     <div className="min-h-screen bg-gray-50">
       <Navigation />
       
-      <div className="container mx-auto px-4 py-8">
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center space-x-3">
-            <Calendar className="text-primary-600" size={32} />
+      <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-8">
+        <div className="flex items-center justify-between mb-4 sm:mb-6">
+          <div className="flex items-center space-x-2 sm:space-x-3">
+            <Calendar className="text-primary-600 flex-shrink-0" size={24} />
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">
+              <h1 className="text-xl sm:text-3xl font-bold text-gray-900">
                 {isAdmin ? 'Historial' : 'Mi Historial'}
               </h1>
-              <p className="text-gray-600">
+              <p className="text-xs sm:text-base text-gray-600 hidden sm:block">
                 {isAdmin ? 'Todas las asignaciones registradas' : 'Mis asignaciones completadas'}
               </p>
             </div>
@@ -117,10 +131,10 @@ export default function HistorialPage() {
         </div>
         
         {/* Filters */}
-        <div className="card mb-6">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="card mb-4 sm:mb-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
               <input
                 type="text"
                 placeholder="Buscar..."
@@ -185,7 +199,7 @@ export default function HistorialPage() {
         
         {/* Content */}
         {loading ? (
-          <div className="text-center py-8 text-gray-500">Cargando...</div>
+          <LoadingSpinner />
         ) : asignacionesFiltradas.length === 0 ? (
           <div className="card text-center py-8 text-gray-500">
             No se encontraron asignaciones
