@@ -8,10 +8,10 @@ import { withAdminAuth } from '@/lib/auth/middleware';
 export const GET = withAdminAuth(async (
   request: NextRequest,
   user,
-  { params }: { params: { id: string } }
+  context
 ) => {
   try {
-    const id = parseInt(params.id);
+    const id = parseInt(context!.params.id);
     const estudiante = await db.select().from(estudiantes).where(eq(estudiantes.id, id)).limit(1);
     
     if (estudiante.length === 0) {
@@ -29,10 +29,10 @@ export const GET = withAdminAuth(async (
 export const PUT = withAdminAuth(async (
   request: NextRequest,
   user,
-  { params }: { params: { id: string } }
+  context
 ) => {
   try {
-    const id = parseInt(params.id);
+    const id = parseInt(context!.params.id);
     const body = await request.json();
     
     const [estudianteActualizado] = await db
@@ -71,10 +71,10 @@ export const PUT = withAdminAuth(async (
 export const DELETE = withAdminAuth(async (
   request: NextRequest,
   user,
-  { params }: { params: { id: string } }
+  context
 ) => {
   try {
-    const id = parseInt(params.id);
+    const id = parseInt(context!.params.id);
     
     const [estudianteEliminado] = await db
       .delete(estudiantes)

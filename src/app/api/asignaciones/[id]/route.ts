@@ -8,10 +8,10 @@ import { withUserAuth, withAdminAuth } from '@/lib/auth/middleware';
 export const PUT = withUserAuth(async (
   request: NextRequest,
   user,
-  { params }: { params: { id: string } }
+  context
 ) => {
   try {
-    const id = parseInt(params.id);
+    const id = parseInt(context!.params.id);
     const body = await request.json();
     
     const [asignacionActualizada] = await db
@@ -41,10 +41,10 @@ export const PUT = withUserAuth(async (
 export const DELETE = withAdminAuth(async (
   request: NextRequest,
   user,
-  { params }: { params: { id: string } }
+  context
 ) => {
   try {
-    const id = parseInt(params.id);
+    const id = parseInt(context!.params.id);
     
     const [asignacionEliminada] = await db
       .delete(asignaciones)

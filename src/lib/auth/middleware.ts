@@ -8,7 +8,7 @@ type RouteContext = { params: any };
  * Verifica que el usuario esté autenticado y opcionalmente valida roles
  */
 export function withAuth(
-  handler: (req: NextRequest, user: JWTPayload) => Promise<NextResponse>,
+  handler: (req: NextRequest, user: JWTPayload, context?: RouteContext) => Promise<NextResponse>,
   options?: {
     roles?: ('ADMIN' | 'USUARIO')[];
   }
@@ -33,8 +33,8 @@ export function withAuth(
         );
       }
 
-      // Usuario autenticado y con permisos correctos
-      return handler(req, user);
+      // Usuario autenticado y con permisos correctos - pasar context si existe
+      return handler(req, user, context);
     } catch (error) {
       console.error('Error en middleware de autenticación:', error);
       return NextResponse.json(
@@ -49,7 +49,7 @@ export function withAuth(
  * Middleware que solo permite ADMIN
  */
 export function withAdminAuth(
-  handler: (req: NextRequest, user: JWTPayload) => Promise<NextResponse>
+  handler: (req: NextRequest, user: JWTPayload, context?: RouteContext) => Promise<NextResponse>
 ) {
   return withAuth(handler, { roles: ['ADMIN'] });
 }
@@ -58,7 +58,7 @@ export function withAdminAuth(
  * Middleware que permite tanto ADMIN como USUARIO
  */
 export function withUserAuth(
-  handler: (req: NextRequest, user: JWTPayload) => Promise<NextResponse>
+  handler: (req: NextRequest, user: JWTPayload, context?: RouteContext) => Promise<NextResponse>
 ) {
   return withAuth(handler, { roles: ['ADMIN', 'USUARIO'] });
 }

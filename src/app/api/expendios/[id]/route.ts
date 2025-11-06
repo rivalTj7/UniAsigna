@@ -8,10 +8,10 @@ import { withAdminAuth } from '@/lib/auth/middleware';
 export const GET = withAdminAuth(async (
   request: NextRequest,
   user,
-  { params }: { params: { id: string } }
+  context
 ) => {
   try {
-    const id = parseInt(params.id);
+    const id = parseInt(context!.params.id);
     const expendio = await db.select().from(expendios).where(eq(expendios.id, id)).limit(1);
     
     if (expendio.length === 0) {
@@ -29,10 +29,10 @@ export const GET = withAdminAuth(async (
 export const PUT = withAdminAuth(async (
   request: NextRequest,
   user,
-  { params }: { params: { id: string } }
+  context
 ) => {
   try {
-    const id = parseInt(params.id);
+    const id = parseInt(context!.params.id);
     const body = await request.json();
     
     const [expendioActualizado] = await db
@@ -62,10 +62,10 @@ export const PUT = withAdminAuth(async (
 export const DELETE = withAdminAuth(async (
   request: NextRequest,
   user,
-  { params }: { params: { id: string } }
+  context
 ) => {
   try {
-    const id = parseInt(params.id);
+    const id = parseInt(context!.params.id);
     
     const [expendioEliminado] = await db
       .delete(expendios)

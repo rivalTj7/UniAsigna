@@ -28,7 +28,7 @@ export const GET = withUserAuth(async (request, user) => {
     
     // Si es USUARIO, filtrar solo sus asignaciones
     if (!isAdmin && userId) {
-      asignacionesConditions.push(eq(asignaciones.estudianteId, parseInt(userId)));
+      asignacionesConditions.push(eq(asignaciones.estudianteId, userId));
     }
     
     // Obtener asignaciones del mes
