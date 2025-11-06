@@ -4,6 +4,9 @@ import { asignaciones } from '@/lib/db/schema';
 import { eq } from 'drizzle-orm';
 import { withUserAuth, withAdminAuth } from '@/lib/auth/middleware';
 
+// Forzar renderizado dinámico (usa cookies)
+export const dynamic = 'force-dynamic';
+
 // PUT - Actualizar informe de asignación (ADMIN y USUARIO)
 export const PUT = withUserAuth(async (
   request: NextRequest,

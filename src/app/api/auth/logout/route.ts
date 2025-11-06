@@ -1,6 +1,9 @@
 import { NextResponse } from 'next/server';
 import { clearAuthCookie } from '@/lib/auth/jwt';
 
+// Forzar renderizado dinámico (usa cookies)
+export const dynamic = 'force-dynamic';
+
 export async function POST() {
   try {
     await clearAuthCookie();

@@ -4,6 +4,9 @@ import { expendios } from '@/lib/db/schema';
 import { eq } from 'drizzle-orm';
 import { withAdminAuth } from '@/lib/auth/middleware';
 
+// Forzar renderizado dinámico (usa cookies)
+export const dynamic = 'force-dynamic';
+
 // GET - Obtener un expendio por ID (Solo ADMIN)
 export const GET = withAdminAuth(async (
   request: NextRequest,

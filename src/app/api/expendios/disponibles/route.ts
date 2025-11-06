@@ -5,6 +5,9 @@ import { eq, and, notInArray } from 'drizzle-orm';
 import { getMesActual, getAnioActual } from '@/lib/utils/dates';
 import { withUserAuth } from '@/lib/auth/middleware';
 
+// Forzar renderizado dinámico (usa cookies)
+export const dynamic = 'force-dynamic';
+
 // GET - Obtener expendios disponibles (no asignados en el mes actual)
 // Protegido - requiere autenticación
 export const GET = withUserAuth(async (request, user) => {

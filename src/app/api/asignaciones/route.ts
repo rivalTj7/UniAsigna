@@ -5,6 +5,9 @@ import { eq, and, desc } from 'drizzle-orm';
 import { getMesActual, getAnioActual } from '@/lib/utils/dates';
 import { withUserAuth, withAdminAuth } from '@/lib/auth/middleware';
 
+// Forzar renderizado dinámico (usa cookies)
+export const dynamic = 'force-dynamic';
+
 // GET - Obtener todas las asignaciones con filtros opcionales (ADMIN y USUARIO)
 export const GET = withUserAuth(async (request, user) => {
   try {

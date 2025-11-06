@@ -5,6 +5,9 @@ import { eq, and, count } from 'drizzle-orm';
 import { getMesActual, getAnioActual } from '@/lib/utils/dates';
 import { withUserAuth } from '@/lib/auth/middleware';
 
+// Forzar renderizado dinámico (usa cookies)
+export const dynamic = 'force-dynamic';
+
 export const GET = withUserAuth(async (request, user) => {
   try {
     // Usar datos del usuario autenticado desde JWT

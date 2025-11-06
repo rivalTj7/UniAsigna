@@ -5,6 +5,9 @@ import { eq, and, desc, notInArray, sql } from 'drizzle-orm';
 import { getMesActual, getAnioActual } from '@/lib/utils/dates';
 import { withUserAuth } from '@/lib/auth/middleware';
 
+// Forzar renderizado dinámico (usa cookies)
+export const dynamic = 'force-dynamic';
+
 /**
  * Endpoint optimizado que devuelve todo lo necesario para la página de asignaciones
  * en una sola llamada HTTP

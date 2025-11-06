@@ -4,6 +4,9 @@ import { estudiantes } from '@/lib/db/schema';
 import bcrypt from 'bcryptjs';
 import { withAdminAuth } from '@/lib/auth/middleware';
 
+// Forzar renderizado dinámico (usa cookies)
+export const dynamic = 'force-dynamic';
+
 // Solo ADMIN puede registrar nuevos usuarios
 export const POST = withAdminAuth(async (request: NextRequest, user) => {
   try {

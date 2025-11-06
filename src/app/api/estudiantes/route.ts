@@ -4,6 +4,9 @@ import { estudiantes, type NuevoEstudiante } from '@/lib/db/schema';
 import { eq } from 'drizzle-orm';
 import { withAdminAuth } from '@/lib/auth/middleware';
 
+// Forzar renderizado dinámico (usa cookies)
+export const dynamic = 'force-dynamic';
+
 // GET - Obtener todos los estudiantes (Solo ADMIN)
 export const GET = withAdminAuth(async (req, user) => {
   try {
