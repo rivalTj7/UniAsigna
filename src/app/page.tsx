@@ -21,29 +21,33 @@ interface Stats {
 }
 
 export default function Home() {
-  const { getUser } = useAuth(); // Protección de autenticación
+  const { getUser, loading: authLoading } = useAuth(); // Protección de autenticación
   const [stats, setStats] = useState<Stats | null>(null);
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<any>(null);
-  
+
   useEffect(() => {
+    // Esperar a que termine la autenticación
+    if (authLoading) return;
+
     const currentUser = getUser();
     if (!currentUser) {
       setLoading(false);
       return;
     }
-    
+
     setUser(currentUser);
-    
+
     // Cargar stats
     const fetchStats = async () => {
       try {
-        const response = await fetch(`/api/dashboard/stats?userId=${currentUser.id}&userRol=${currentUser.rol}`);
-        
+        // El backend obtiene el usuario automáticamente desde el JWT
+        const response = await fetch('/api/dashboard/stats');
+
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
-        
+
         const data = await response.json();
         setStats(data);
       } catch (error) {
@@ -53,10 +57,10 @@ export default function Home() {
         setLoading(false);
       }
     };
-    
+
     fetchStats();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [authLoading]);
   
   if (loading) {
     return (

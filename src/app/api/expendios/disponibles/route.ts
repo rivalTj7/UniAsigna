@@ -3,9 +3,11 @@ import { db } from '@/lib/db';
 import { expendios, asignaciones } from '@/lib/db/schema';
 import { eq, and, notInArray } from 'drizzle-orm';
 import { getMesActual, getAnioActual } from '@/lib/utils/dates';
+import { withUserAuth } from '@/lib/auth/middleware';
 
 // GET - Obtener expendios disponibles (no asignados en el mes actual)
-export async function GET() {
+// Protegido - requiere autenticación
+export const GET = withUserAuth(async (request, user) => {
   try {
     const mesActual = getMesActual();
     const anioActual = getAnioActual();
@@ -57,4 +59,4 @@ export async function GET() {
     console.error('Error al obtener expendios disponibles:', error);
     return NextResponse.json({ error: 'Error al obtener expendios disponibles' }, { status: 500 });
   }
-}
+});

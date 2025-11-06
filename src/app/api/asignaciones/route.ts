@@ -3,9 +3,10 @@ import { db } from '@/lib/db';
 import { asignaciones, estudiantes, expendios, type NuevaAsignacion } from '@/lib/db/schema';
 import { eq, and, desc } from 'drizzle-orm';
 import { getMesActual, getAnioActual } from '@/lib/utils/dates';
+import { withUserAuth, withAdminAuth } from '@/lib/auth/middleware';
 
-// GET - Obtener todas las asignaciones con filtros opcionales
-export async function GET(request: NextRequest) {
+// GET - Obtener todas las asignaciones con filtros opcionales (ADMIN y USUARIO)
+export const GET = withUserAuth(async (request, user) => {
   try {
     const { searchParams } = new URL(request.url);
     const mes = searchParams.get('mes');
@@ -63,10 +64,10 @@ export async function GET(request: NextRequest) {
     console.error('Error al obtener asignaciones:', error);
     return NextResponse.json({ error: 'Error al obtener asignaciones' }, { status: 500 });
   }
-}
+});
 
-// POST - Crear nueva asignación
-export async function POST(request: NextRequest) {
+// POST - Crear nueva asignación (Solo ADMIN)
+export const POST = withAdminAuth(async (request, user) => {
   try {
     const body = await request.json();
     
@@ -153,4 +154,4 @@ export async function POST(request: NextRequest) {
     
     return NextResponse.json({ error: 'Error al crear asignación' }, { status: 500 });
   }
-}
+});

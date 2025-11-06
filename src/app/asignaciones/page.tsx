@@ -9,6 +9,7 @@ import Footer from '@/components/Footer';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import { Plus, CheckCircle, Clock, FileText } from 'lucide-react';
 import { getNombreMes, getMesActual, getAnioActual, formatearFechaCorta } from '@/lib/utils/dates';
+import toast from 'react-hot-toast';
 
 interface Estudiante {
   id: number;
@@ -41,7 +42,7 @@ interface Asignacion {
 }
 
 export default function AsignacionesPage() {
-  const { getUser } = useAuth(); // Protección de autenticación
+  const { getUser, loading: authLoading } = useAuth(); // Protección de autenticación
   const [asignaciones, setAsignaciones] = useState<Asignacion[]>([]);
   const [estudiantes, setEstudiantes] = useState<Estudiante[]>([]);
   const [expendiosDisponibles, setExpendiosDisponibles] = useState<Expendio[]>([]);
@@ -58,15 +59,21 @@ export default function AsignacionesPage() {
     observaciones: '',
     calificacion: 'Bueno',
   });
-  
+
   useEffect(() => {
+    // Esperar a que termine la autenticación
+    if (authLoading) return;
+
     const user = getUser();
+    console.log('Usuario autenticado en AsignacionesPage:', user);
     if (user) {
       setIsAdmin(user.rol === 'ADMIN');
       fetchData();
+    } else {
+      setLoading(false);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [authLoading]);
   
   const fetchData = async () => {
     try {
@@ -75,18 +82,17 @@ export default function AsignacionesPage() {
         setLoading(false);
         return;
       }
-      
+
       // ✅ UNA SOLA LLAMADA optimizada que trae todo lo necesario
-      const response = await fetch(
-        `/api/asignaciones/data?userId=${user.id}&userRol=${user.rol}`
-      );
-      
+      // El backend obtiene el usuario automáticamente desde el JWT
+      const response = await fetch('/api/asignaciones/data');
+
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-      
+
       const data = await response.json();
-      
+
       // Actualizar estados con los datos recibidos
       setAsignaciones(Array.isArray(data.asignaciones) ? data.asignaciones : []);
       setEstudiantes(Array.isArray(data.estudiantes) ? data.estudiantes : []);
@@ -117,14 +123,16 @@ export default function AsignacionesPage() {
       if (response.ok) {
         setShowModalAsignar(false);
         setFormAsignar({ estudianteId: '', expendioId: '' });
+        toast.success('Asignación creada exitosamente');
         // ✅ Recargar datos optimizado
         await fetchData();
       } else {
         const error = await response.json();
-        console.error('Error al crear asignación:', error.error || 'Error desconocido');
+        toast.error(error.error || 'Error al crear asignación');
       }
     } catch (error) {
       console.error('Error:', error);
+      toast.error('Error de conexión');
     }
   };
   
@@ -143,14 +151,16 @@ export default function AsignacionesPage() {
         setShowModalInforme(false);
         setSelectedAsignacion(null);
         setFormInforme({ observaciones: '', calificacion: 'Bueno' });
+        toast.success('Informe cargado exitosamente');
         // ✅ Recargar datos optimizado
         await fetchData();
       } else {
         const error = await response.json();
-        console.error('Error al cargar informe:', error.error || 'Error desconocido');
+        toast.error(error.error || 'Error al cargar informe');
       }
     } catch (error) {
       console.error('Error:', error);
+      toast.error('Error de conexión');
     }
   };
   

@@ -2,12 +2,14 @@ import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { expendios } from '@/lib/db/schema';
 import { eq } from 'drizzle-orm';
+import { withAdminAuth } from '@/lib/auth/middleware';
 
-// GET - Obtener un expendio por ID
-export async function GET(
+// GET - Obtener un expendio por ID (Solo ADMIN)
+export const GET = withAdminAuth(async (
   request: NextRequest,
+  user,
   { params }: { params: { id: string } }
-) {
+) => {
   try {
     const id = parseInt(params.id);
     const expendio = await db.select().from(expendios).where(eq(expendios.id, id)).limit(1);
@@ -21,13 +23,14 @@ export async function GET(
     console.error('Error al obtener expendio:', error);
     return NextResponse.json({ error: 'Error al obtener expendio' }, { status: 500 });
   }
-}
+});
 
-// PUT - Actualizar un expendio
-export async function PUT(
+// PUT - Actualizar un expendio (Solo ADMIN)
+export const PUT = withAdminAuth(async (
   request: NextRequest,
+  user,
   { params }: { params: { id: string } }
-) {
+) => {
   try {
     const id = parseInt(params.id);
     const body = await request.json();
@@ -53,13 +56,14 @@ export async function PUT(
     console.error('Error al actualizar expendio:', error);
     return NextResponse.json({ error: 'Error al actualizar expendio' }, { status: 500 });
   }
-}
+});
 
-// DELETE - Eliminar un expendio
-export async function DELETE(
+// DELETE - Eliminar un expendio (Solo ADMIN)
+export const DELETE = withAdminAuth(async (
   request: NextRequest,
+  user,
   { params }: { params: { id: string } }
-) {
+) => {
   try {
     const id = parseInt(params.id);
     
@@ -77,4 +81,4 @@ export async function DELETE(
     console.error('Error al eliminar expendio:', error);
     return NextResponse.json({ error: 'Error al eliminar expendio' }, { status: 500 });
   }
-}
+});

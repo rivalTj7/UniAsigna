@@ -3,12 +3,13 @@ import { db } from '@/lib/db';
 import { estudiantes, expendios, asignaciones } from '@/lib/db/schema';
 import { eq, and, count } from 'drizzle-orm';
 import { getMesActual, getAnioActual } from '@/lib/utils/dates';
+import { withUserAuth } from '@/lib/auth/middleware';
 
-export async function GET(request: NextRequest) {
+export const GET = withUserAuth(async (request, user) => {
   try {
-    const { searchParams } = new URL(request.url);
-    const userId = searchParams.get('userId');
-    const userRol = searchParams.get('userRol');
+    // Usar datos del usuario autenticado desde JWT
+    const userId = user.id;
+    const userRol = user.rol;
     
     const mesActual = getMesActual();
     const anioActual = getAnioActual();
@@ -17,7 +18,7 @@ export async function GET(request: NextRequest) {
     
     // Si es USUARIO normal, solo mostrar sus estadísticas
     if (!isAdmin && userId) {
-      const userIdNum = parseInt(userId);
+      const userIdNum = userId;
       
       // Asignaciones del usuario en el mes actual
       const asignacionesMes = await db
@@ -105,4 +106,4 @@ export async function GET(request: NextRequest) {
     console.error('Error al obtener estadísticas:', error);
     return NextResponse.json({ error: 'Error al obtener estadísticas' }, { status: 500 });
   }
-}
+});

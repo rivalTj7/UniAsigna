@@ -2,12 +2,14 @@ import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { estudiantes } from '@/lib/db/schema';
 import { eq } from 'drizzle-orm';
+import { withAdminAuth } from '@/lib/auth/middleware';
 
-// GET - Obtener un estudiante por ID
-export async function GET(
+// GET - Obtener un estudiante por ID (Solo ADMIN)
+export const GET = withAdminAuth(async (
   request: NextRequest,
+  user,
   { params }: { params: { id: string } }
-) {
+) => {
   try {
     const id = parseInt(params.id);
     const estudiante = await db.select().from(estudiantes).where(eq(estudiantes.id, id)).limit(1);
@@ -21,13 +23,14 @@ export async function GET(
     console.error('Error al obtener estudiante:', error);
     return NextResponse.json({ error: 'Error al obtener estudiante' }, { status: 500 });
   }
-}
+});
 
-// PUT - Actualizar un estudiante
-export async function PUT(
+// PUT - Actualizar un estudiante (Solo ADMIN)
+export const PUT = withAdminAuth(async (
   request: NextRequest,
+  user,
   { params }: { params: { id: string } }
-) {
+) => {
   try {
     const id = parseInt(params.id);
     const body = await request.json();
@@ -62,13 +65,14 @@ export async function PUT(
     
     return NextResponse.json({ error: 'Error al actualizar estudiante' }, { status: 500 });
   }
-}
+});
 
-// DELETE - Eliminar un estudiante
-export async function DELETE(
+// DELETE - Eliminar un estudiante (Solo ADMIN)
+export const DELETE = withAdminAuth(async (
   request: NextRequest,
+  user,
   { params }: { params: { id: string } }
-) {
+) => {
   try {
     const id = parseInt(params.id);
     
@@ -86,4 +90,4 @@ export async function DELETE(
     console.error('Error al eliminar estudiante:', error);
     return NextResponse.json({ error: 'Error al eliminar estudiante' }, { status: 500 });
   }
-}
+});

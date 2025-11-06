@@ -3,6 +3,7 @@ import { db } from '@/lib/db';
 import { estudiantes } from '@/lib/db/schema';
 import { eq } from 'drizzle-orm';
 import bcrypt from 'bcryptjs';
+import { generateToken, setAuthCookie } from '@/lib/auth/jwt';
 
 export async function POST(request: NextRequest) {
   try {
@@ -38,6 +39,19 @@ export async function POST(request: NextRequest) {
         { status: 403 }
       );
     }
+    
+    // Generar JWT token
+    const token = generateToken({
+      id: estudiante.id,
+      codigo: estudiante.codigo,
+      nombre: estudiante.nombre,
+      apellido: estudiante.apellido,
+      carnet: estudiante.carnet,
+      rol: estudiante.rol as 'ADMIN' | 'USUARIO',
+    });
+    
+    // Establecer cookie httpOnly
+    await setAuthCookie(token);
     
     // Login exitoso - devolver usuario sin password
     const { password: _, ...userSinPassword } = estudiante;

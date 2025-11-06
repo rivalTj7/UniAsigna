@@ -2,12 +2,14 @@ import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { asignaciones } from '@/lib/db/schema';
 import { eq } from 'drizzle-orm';
+import { withUserAuth, withAdminAuth } from '@/lib/auth/middleware';
 
-// PUT - Actualizar informe de asignación
-export async function PUT(
+// PUT - Actualizar informe de asignación (ADMIN y USUARIO)
+export const PUT = withUserAuth(async (
   request: NextRequest,
+  user,
   { params }: { params: { id: string } }
-) {
+) => {
   try {
     const id = parseInt(params.id);
     const body = await request.json();
@@ -33,13 +35,14 @@ export async function PUT(
     console.error('Error al actualizar informe:', error);
     return NextResponse.json({ error: 'Error al actualizar informe' }, { status: 500 });
   }
-}
+});
 
-// DELETE - Eliminar una asignación
-export async function DELETE(
+// DELETE - Eliminar una asignación (Solo ADMIN)
+export const DELETE = withAdminAuth(async (
   request: NextRequest,
+  user,
   { params }: { params: { id: string } }
-) {
+) => {
   try {
     const id = parseInt(params.id);
     
@@ -57,4 +60,4 @@ export async function DELETE(
     console.error('Error al eliminar asignación:', error);
     return NextResponse.json({ error: 'Error al eliminar asignación' }, { status: 500 });
   }
-}
+});

@@ -6,8 +6,10 @@ import { useEffect, useState } from 'react';
 import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
 import LoadingSpinner from '@/components/LoadingSpinner';
+import ConfirmDialog from '@/components/ConfirmDialog';
 import { Plus, Edit2, Trash2, Search } from 'lucide-react';
 import { useAuth } from '@/lib/hooks/useAuth';
+import toast from 'react-hot-toast';
 
 interface Estudiante {
   id: number;
@@ -20,10 +22,12 @@ interface Estudiante {
 }
 
 export default function EstudiantesPage() {
-  useAuth(); // Protección de autenticación
+  const { getUser, loading: authLoading } = useAuth(); // Protección de autenticación
   const [estudiantes, setEstudiantes] = useState<Estudiante[]>([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const [estudianteToDelete, setEstudianteToDelete] = useState<number | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [formData, setFormData] = useState({
     id: null as number | null,
@@ -34,10 +38,20 @@ export default function EstudiantesPage() {
     rol: 'USUARIO',
     activo: true,
   });
-  
+
   useEffect(() => {
+    // Esperar a que termine la autenticación
+    if (authLoading) return;
+
+    // Verificar que el usuario sea ADMIN
+    const user = getUser();
+    if (!user || user.rol !== 'ADMIN') {
+      window.location.href = '/';
+      return;
+    }
     fetchEstudiantes();
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [authLoading]);
   
   const fetchEstudiantes = async () => {
     try {
@@ -46,6 +60,7 @@ export default function EstudiantesPage() {
       setEstudiantes(data);
     } catch (error) {
       console.error('Error al cargar estudiantes:', error);
+      toast.error('Error al cargar estudiantes');
     } finally {
       setLoading(false);
     }
@@ -68,12 +83,14 @@ export default function EstudiantesPage() {
         await fetchEstudiantes();
         setShowModal(false);
         resetForm();
+        toast.success(formData.id ? 'Estudiante actualizado exitosamente' : 'Estudiante creado exitosamente');
       } else {
         const error = await response.json();
-        console.error('Error al guardar estudiante:', error.error || 'Error desconocido');
+        toast.error(error.error || 'Error al guardar estudiante');
       }
     } catch (error) {
       console.error('Error:', error);
+      toast.error('Error de conexión');
     }
   };
   
@@ -90,16 +107,28 @@ export default function EstudiantesPage() {
     setShowModal(true);
   };
   
-  const handleDelete = async (id: number) => {
-    if (!confirm('¿Estás seguro de eliminar este estudiante?')) return;
+  const handleDelete = (id: number) => {
+    setEstudianteToDelete(id);
+    setShowConfirmDialog(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!estudianteToDelete) return;
     
     try {
-      const response = await fetch(`/api/estudiantes/${id}`, { method: 'DELETE' });
+      const response = await fetch(`/api/estudiantes/${estudianteToDelete}`, { method: 'DELETE' });
       if (response.ok) {
         await fetchEstudiantes();
+        toast.success('Estudiante eliminado exitosamente');
+      } else {
+        const error = await response.json();
+        toast.error(error.error || 'Error al eliminar estudiante');
       }
     } catch (error) {
       console.error('Error al eliminar:', error);
+      toast.error('Error de conexión');
+    } finally {
+      setEstudianteToDelete(null);
     }
   };
   
@@ -324,6 +353,21 @@ export default function EstudiantesPage() {
           </div>
         )}
       </div>
+
+      {/* Confirm Delete Dialog */}
+      <ConfirmDialog
+        isOpen={showConfirmDialog}
+        onClose={() => {
+          setShowConfirmDialog(false);
+          setEstudianteToDelete(null);
+        }}
+        onConfirm={confirmDelete}
+        title="Eliminar Estudiante"
+        message="¿Estás seguro de que deseas eliminar este estudiante? Esta acción no se puede deshacer."
+        confirmText="Eliminar"
+        cancelText="Cancelar"
+        type="danger"
+      />
       
       <Footer />
     </div>

@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { User, Mail, Lock, Eye, EyeOff, UserPlus, CreditCard } from 'lucide-react';
+import toast from 'react-hot-toast';
 
 export default function RegistroPage() {
   const router = useRouter();
@@ -25,12 +26,12 @@ export default function RegistroPage() {
     
     // Validar contraseñas
     if (formData.password !== formData.confirmPassword) {
-      setError('Las contraseñas no coinciden');
+      toast.error('Las contraseñas no coinciden');
       return;
     }
     
     if (formData.password.length < 6) {
-      setError('La contraseña debe tener al menos 6 caracteres');
+      toast.error('La contraseña debe tener al menos 6 caracteres');
       return;
     }
     
@@ -52,12 +53,13 @@ export default function RegistroPage() {
       const data = await response.json();
 
       if (data.success) {
+        toast.success('Usuario registrado exitosamente');
         router.push('/login');
       } else {
-        setError(data.error || 'Error al registrarse');
+        toast.error(data.error || 'Error al registrarse');
       }
     } catch (error) {
-      setError('Error de conexión. Intenta nuevamente.');
+      toast.error('Error de conexión. Intenta nuevamente.');
     } finally {
       setLoading(false);
     }
@@ -70,10 +72,12 @@ export default function RegistroPage() {
         <div className="text-center mb-8">
           <div className="flex justify-center mb-4">
             <Image 
-              src="/logo-laboratorio.jpeg" 
+              src="/logo-laboratorio.webp" 
               alt="Laboratorio" 
               width={100} 
               height={100}
+              priority
+              quality={90}
               className="rounded-lg shadow-lg"
             />
           </div>

@@ -2,9 +2,10 @@ import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { estudiantes, type NuevoEstudiante } from '@/lib/db/schema';
 import { eq } from 'drizzle-orm';
+import { withAdminAuth } from '@/lib/auth/middleware';
 
-// GET - Obtener todos los estudiantes
-export async function GET() {
+// GET - Obtener todos los estudiantes (Solo ADMIN)
+export const GET = withAdminAuth(async (req, user) => {
   try {
     const todosEstudiantes = await db.select().from(estudiantes).orderBy(estudiantes.apellido);
     return NextResponse.json(todosEstudiantes);
@@ -12,10 +13,10 @@ export async function GET() {
     console.error('Error al obtener estudiantes:', error);
     return NextResponse.json({ error: 'Error al obtener estudiantes' }, { status: 500 });
   }
-}
+});
 
-// POST - Crear nuevo estudiante
-export async function POST(request: NextRequest) {
+// POST - Crear nuevo estudiante (Solo ADMIN)
+export const POST = withAdminAuth(async (request, user) => {
   try {
     const body = await request.json();
     
@@ -53,4 +54,4 @@ export async function POST(request: NextRequest) {
     
     return NextResponse.json({ error: 'Error al crear estudiante' }, { status: 500 });
   }
-}
+});

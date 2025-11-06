@@ -37,18 +37,21 @@ interface Asignacion {
 }
 
 export default function HistorialPage() {
-  const { getUser } = useAuth(); // Protección de autenticación
+  const { getUser, loading: authLoading } = useAuth(); // Protección de autenticación
   const [asignaciones, setAsignaciones] = useState<Asignacion[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterMes, setFilterMes] = useState('');
   const [filterAnio, setFilterAnio] = useState('');
   const [filterEstado, setFilterEstado] = useState('');
-  
+
   const user = getUser();
   const isAdmin = user?.rol === 'ADMIN';
-  
+
   useEffect(() => {
+    // Esperar a que termine la autenticación
+    if (authLoading) return;
+
     const fetchHistorial = async () => {
       try {
         const currentUser = getUser();
@@ -56,20 +59,20 @@ export default function HistorialPage() {
           setLoading(false);
           return;
         }
-        
+
         let url = '/api/asignaciones';
-        
+
         // Si es USUARIO (estudiante), filtrar solo sus asignaciones
         if (currentUser.rol === 'USUARIO') {
           url = `/api/asignaciones?estudianteId=${currentUser.id}`;
         }
-        
+
         const response = await fetch(url);
-        
+
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
-        
+
         const data = await response.json();
         setAsignaciones(Array.isArray(data) ? data : []);
       } catch (error) {
@@ -82,7 +85,7 @@ export default function HistorialPage() {
     
     fetchHistorial();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [authLoading]);
   
   // Obtener años únicos
   const aniosUnicos = [...new Set(asignaciones.map(a => a.anio))].sort((a, b) => b - a);

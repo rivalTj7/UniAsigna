@@ -2,8 +2,10 @@ import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { estudiantes } from '@/lib/db/schema';
 import bcrypt from 'bcryptjs';
+import { withAdminAuth } from '@/lib/auth/middleware';
 
-export async function POST(request: NextRequest) {
+// Solo ADMIN puede registrar nuevos usuarios
+export const POST = withAdminAuth(async (request: NextRequest, user) => {
   try {
     const { codigo, nombre, apellido, carnet, password } = await request.json();
     
@@ -58,4 +60,4 @@ export async function POST(request: NextRequest) {
     
     return NextResponse.json({ error: 'Error en el servidor' }, { status: 500 });
   }
-}
+});

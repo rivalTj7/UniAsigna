@@ -7,7 +7,9 @@ import { useEffect, useState } from 'react';
 import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
 import LoadingSpinner from '@/components/LoadingSpinner';
+import ConfirmDialog from '@/components/ConfirmDialog';
 import { Plus, Edit2, Trash2, Search } from 'lucide-react';
+import toast from 'react-hot-toast';
 
 interface Expendio {
   id: number;
@@ -19,10 +21,12 @@ interface Expendio {
 }
 
 export default function ExpendiosPage() {
-  useAuth(); // Protección de autenticación
+  const { getUser, loading: authLoading } = useAuth(); // Protección de autenticación
   const [expendios, setExpendios] = useState<Expendio[]>([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const [expendioToDelete, setExpendioToDelete] = useState<number | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [formData, setFormData] = useState({
     id: null as number | null,
@@ -32,10 +36,20 @@ export default function ExpendiosPage() {
     tipo: 'KIOSKO',
     activo: true,
   });
-  
+
   useEffect(() => {
+    // Esperar a que termine la autenticación
+    if (authLoading) return;
+
+    // Verificar que el usuario sea ADMIN
+    const user = getUser();
+    if (!user || user.rol !== 'ADMIN') {
+      window.location.href = '/';
+      return;
+    }
     fetchExpendios();
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [authLoading]);
   
   const fetchExpendios = async () => {
     try {
@@ -44,6 +58,7 @@ export default function ExpendiosPage() {
       setExpendios(data);
     } catch (error) {
       console.error('Error al cargar expendios:', error);
+      toast.error('Error al cargar expendios');
     } finally {
       setLoading(false);
     }
@@ -66,12 +81,14 @@ export default function ExpendiosPage() {
         await fetchExpendios();
         setShowModal(false);
         resetForm();
+        toast.success(formData.id ? 'Expendio actualizado exitosamente' : 'Expendio creado exitosamente');
       } else {
         const error = await response.json();
-        console.error('Error al guardar expendio:', error.error || 'Error desconocido');
+        toast.error(error.error || 'Error al guardar expendio');
       }
     } catch (error) {
       console.error('Error:', error);
+      toast.error('Error de conexión');
     }
   };
   
@@ -87,16 +104,28 @@ export default function ExpendiosPage() {
     setShowModal(true);
   };
   
-  const handleDelete = async (id: number) => {
-    if (!confirm('¿Estás seguro de eliminar este expendio?')) return;
+  const handleDelete = (id: number) => {
+    setExpendioToDelete(id);
+    setShowConfirmDialog(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!expendioToDelete) return;
     
     try {
-      const response = await fetch(`/api/expendios/${id}`, { method: 'DELETE' });
+      const response = await fetch(`/api/expendios/${expendioToDelete}`, { method: 'DELETE' });
       if (response.ok) {
         await fetchExpendios();
+        toast.success('Expendio eliminado exitosamente');
+      } else {
+        const error = await response.json();
+        toast.error(error.error || 'Error al eliminar expendio');
       }
     } catch (error) {
       console.error('Error al eliminar:', error);
+      toast.error('Error de conexión');
+    } finally {
+      setExpendioToDelete(null);
     }
   };
   
@@ -303,6 +332,21 @@ export default function ExpendiosPage() {
           </div>
         )}
       </div>
+
+      {/* Confirm Delete Dialog */}
+      <ConfirmDialog
+        isOpen={showConfirmDialog}
+        onClose={() => {
+          setShowConfirmDialog(false);
+          setExpendioToDelete(null);
+        }}
+        onConfirm={confirmDelete}
+        title="Eliminar Expendio"
+        message="¿Estás seguro de que deseas eliminar este expendio? Esta acción no se puede deshacer."
+        confirmText="Eliminar"
+        cancelText="Cancelar"
+        type="danger"
+      />
     </div>
   );
 }

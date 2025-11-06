@@ -2,9 +2,10 @@ import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { expendios, type NuevoExpendio } from '@/lib/db/schema';
 import { eq } from 'drizzle-orm';
+import { withAdminAuth } from '@/lib/auth/middleware';
 
-// GET - Obtener todos los expendios
-export async function GET() {
+// GET - Obtener todos los expendios (Solo ADMIN)
+export const GET = withAdminAuth(async (req, user) => {
   try {
     const todosExpendios = await db.select().from(expendios).orderBy(expendios.ubicacion);
     return NextResponse.json(todosExpendios);
@@ -12,10 +13,10 @@ export async function GET() {
     console.error('Error al obtener expendios:', error);
     return NextResponse.json({ error: 'Error al obtener expendios' }, { status: 500 });
   }
-}
+});
 
-// POST - Crear nuevo expendio
-export async function POST(request: NextRequest) {
+// POST - Crear nuevo expendio (Solo ADMIN)
+export const POST = withAdminAuth(async (request, user) => {
   try {
     const body = await request.json();
     
@@ -42,4 +43,4 @@ export async function POST(request: NextRequest) {
     console.error('Error al crear expendio:', error);
     return NextResponse.json({ error: 'Error al crear expendio' }, { status: 500 });
   }
-}
+});

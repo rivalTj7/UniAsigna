@@ -3,17 +3,19 @@ import { db } from '@/lib/db';
 import { asignaciones, estudiantes, expendios } from '@/lib/db/schema';
 import { eq, and, desc, notInArray, sql } from 'drizzle-orm';
 import { getMesActual, getAnioActual } from '@/lib/utils/dates';
+import { withUserAuth } from '@/lib/auth/middleware';
 
 /**
  * Endpoint optimizado que devuelve todo lo necesario para la página de asignaciones
  * en una sola llamada HTTP
+ * Protegido con autenticación JWT - tanto ADMIN como USUARIO pueden acceder
  */
-export async function GET(request: NextRequest) {
+export const GET = withUserAuth(async (request, user) => {
   try {
-    const { searchParams } = new URL(request.url);
-    const userId = searchParams.get('userId');
-    const userRol = searchParams.get('userRol');
-    
+    // Usar datos del usuario autenticado desde JWT
+    const userId = user.id;
+    const userRol = user.rol;
+
     const mesActual = getMesActual();
     const anioActual = getAnioActual();
     const isAdmin = userRol === 'ADMIN';
@@ -121,4 +123,4 @@ export async function GET(request: NextRequest) {
       { status: 500 }
     );
   }
-}
+});
